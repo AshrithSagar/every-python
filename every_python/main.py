@@ -400,8 +400,12 @@ def run(
 @app.command()
 def list_builds():
     """List locally built Python versions."""
+    builds: list[Path] = []
+    if BUILDS_DIR.exists():
+        builds = [b for b in BUILDS_DIR.iterdir() if b.name != ".DS_Store"]
+
     output = get_output()
-    if not BUILDS_DIR.exists() or not list(BUILDS_DIR.iterdir()):
+    if not builds:
         output.warning("No builds found.")
         output.info("Run every-python install main to build the latest version.")
         return
@@ -409,7 +413,7 @@ def list_builds():
     # Get version info for all builds
     runner = get_runner()
     build_versions: list[BuildVersion] = []
-    for build in BUILDS_DIR.iterdir():
+    for build in builds:
         build_info = BuildInfo.from_directory(build)
         python_bin = build / "bin" / "python3"
 
